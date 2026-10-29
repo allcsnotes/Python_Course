@@ -1,0 +1,25 @@
+print("=== allcsvideos enrolment ===")
+name = input("Full name: ").strip()
+email = input("Email: ").strip().lower()
+age_text = input("Age: ").strip()
+course = input("Course: ").strip()
+fee = int(input("Fee in rupees: ").replace(",", ""))
+hours = float(input("Hours per week: "))
+
+print()
+print("Age is a number:", age_text.isdigit())
+age = int(age_text)
+gst = fee * 18 // 100
+total = fee + gst
+
+print("Saving", end="... ")
+print("done")
+print("-" * 30)
+print("Name   :", name)
+print("Email  :", email)
+print("Age    :", age)
+print("Course :", course)
+print(f"Fee    : {fee:>8,}")
+print(f"GST 18%: {gst:>8,}")
+print(f"Total  : {total:>8,}")
+print("Weekly :", hours, "hours")

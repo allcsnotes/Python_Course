@@ -1,0 +1,10 @@
+2026-09-01 08:00:01 INFO GET /courses 200 104ms
+2026-09-01 08:00:09 INFO Student 12 enrolled in course 3
+2026-09-01 08:01:44 WARNING Slow query on lessons table (873ms)
+2026-09-01 08:02:10 INFO GET /lessons/18 200 302ms
+2026-09-01 08:03:31 ERROR Payment failed for order 8097
+2026-09-01 08:04:02 INFO Video 62 started for student 7
+2026-09-01 08:05:15 WARNING Disk usage at 84 percent
+2026-09-01 08:06:40 INFO GET /courses 200 98ms
+2026-09-01 08:07:03 ERROR Database connection timeout
+2026-09-01 08:08:55 INFO Student 31 enrolled in course 1

@@ -1,0 +1,5 @@
+print("=== allcsvideos enrolment ===")
+name = input("Full name: ").strip()
+email = input("Email: ").strip().lower()
+print(name)
+print(email)

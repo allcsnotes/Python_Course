@@ -1,0 +1,11 @@
+# Exercise 17 - sep and end
+print("Lukas", "enrolled in", 3, "courses")
+print(22, 10, 2026, sep="/")
+print("asha", "allcsvideos.com", sep="@")
+print("Python", "Basics", sep="")
+print("Loading", end="... ")
+print("done")
+print(1, end=" ")
+print(2, end=" ")
+print(3)
+print("Next")

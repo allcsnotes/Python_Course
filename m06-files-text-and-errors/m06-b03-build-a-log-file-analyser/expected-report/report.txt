@@ -1,0 +1,49 @@
+allcsvideos server log report
+
+Lines read: 6000
+Bad lines:  6
+INFO      5311
+WARNING    479
+ERROR      204
+
+Errors per hour
+
+00:00                                  2
+01:00                                  0
+02:00                                  1
+03:00                                  0
+04:00                                  0
+05:00                                  2
+06:00 #                                3
+07:00 ##                               6
+08:00 ##                               6
+09:00 ##                               6
+10:00 #                                4
+11:00 ##                               6
+12:00 #                                5
+13:00 ##                               8
+14:00 ################################ 96
+15:00 ###                              10
+16:00 #                                5
+17:00 ##                               8
+18:00 ####                             13
+19:00 ##                               7
+20:00 ###                              10
+21:00 #                                4
+22:00                                  1
+23:00                                  1
+
+Top error messages
+
+   57  Video # file not found
+   50  Database connection timeout
+   50  Upload failed for lesson #
+
+Skipped lines
+
+line 42: need 4 parts, got 1
+line 1201: need 4 parts, got 2
+line 2751: time data '2026-03-12 25:61:07' does not match format '%Y-%m-%d %H:%M:%S'
+line 4101: unknown level rotated
+line 5201: unknown level ERORR
+line 5901: unknown level recent

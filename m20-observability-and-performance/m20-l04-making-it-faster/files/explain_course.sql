@@ -1,0 +1,2 @@
+EXPLAIN (ANALYZE, COSTS OFF, TIMING OFF)
+SELECT * FROM enrollments WHERE course_id = 3;

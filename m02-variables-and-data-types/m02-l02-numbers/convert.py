@@ -1,0 +1,7 @@
+print(int(3.99))
+print(float(7))
+print(round(3.14159, 2))
+print(round(2.5))
+print(round(3.5))
+print(round(0.5))
+print(round(1.5))

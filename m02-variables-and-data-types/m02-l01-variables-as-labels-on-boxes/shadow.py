@@ -1,0 +1,2 @@
+print = "Lukas"
+print("Hello")

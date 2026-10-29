@@ -1,0 +1,6 @@
+course = ("Python Basics", 1499, "beginner")
+print(course)
+print(type(course))
+print(course[0])
+print(course[-1])
+print(len(course))

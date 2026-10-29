@@ -1,0 +1,50 @@
+name: m19l02c
+
+x-app: &app
+  image: m19l02-api:v1
+  env_file: env/compose.env
+  secrets: [database_url, secret_key]
+
+services:
+  db:
+    image: postgres:17.11
+    environment:
+      POSTGRES_USER: allcs
+      POSTGRES_DB: allcs
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets: [db_password]
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "allcs"]
+      interval: 2s
+      retries: 20
+
+  redis:
+    image: redis:8
+
+  migrate:
+    <<: *app
+    command: alembic upgrade head
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *app
+    ports:
+      - "9292:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+secrets:
+  db_password:
+    file: ./secrets/db_password
+  database_url:
+    file: ./secrets/database_url
+  secret_key:
+    file: ./secrets/secret_key
+
+volumes:
+  dbdata:

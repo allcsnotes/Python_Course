@@ -1,0 +1,7 @@
+[
+  {"id": 1, "title": "Python Basics", "price": 499, "level": "beginner"},
+  {"id": 2, "title": "Object-Oriented Python", "price": 899, "level": "intermediate"},
+  {"id": 3, "title": "FastAPI in Practice", "price": 1499, "level": "intermediate"},
+  {"id": 4, "title": "Async Python", "price": 1299, "level": "advanced"},
+  {"id": 5, "title": "Docker for Python Apps", "price": 999, "level": "intermediate"}
+]

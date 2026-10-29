@@ -1,0 +1,6 @@
+print("Loading", end="... ")
+print("done")
+print(1, end=" ")
+print(2, end=" ")
+print(3)
+print("Next")

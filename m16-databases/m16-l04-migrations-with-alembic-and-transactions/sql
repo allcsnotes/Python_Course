@@ -1,0 +1,2 @@
+#!/bin/zsh
+docker exec m16l04-pg psql -U allcs allcsvideos -c "$1"

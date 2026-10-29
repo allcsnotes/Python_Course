@@ -1,0 +1,5 @@
+# minute hour day month weekday  user  command
+# The real schedule: every Monday at 8:00, India time.
+# 0 8 * * 1  app  /app/run.sh >> /data/report.log 2>&1
+# The demo schedule: every minute.
+* * * * *  app  /app/run.sh >> /data/report.log 2>&1

@@ -1,0 +1,68 @@
+name: m19l01
+
+x-app: &app
+  build: .
+  image: m19l01-api
+  environment:
+    DATABASE_URL: postgresql+psycopg://allcs:allcs@db:5432/allcs
+    REDIS_URL: redis://redis:6379/0
+    SMTP_HOST: mail
+    SMTP_PORT: "1025"
+    SECRET_KEY: demo-secret-not-real-12345
+
+services:
+  db:
+    image: postgres:17.11
+    environment:
+      POSTGRES_USER: allcs
+      POSTGRES_PASSWORD: allcs
+      POSTGRES_DB: allcs
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "allcs"]
+      interval: 2s
+      retries: 20
+
+  redis:
+    image: redis:8
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 20
+
+  mail:
+    image: axllent/mailpit:v1.32.0
+    ports:
+      - "19511:8025"
+
+  migrate:
+    <<: *app
+    command: alembic upgrade head
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *app
+    ports:
+      - "8195:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  worker:
+    <<: *app
+    command: celery -A app.worker worker --loglevel=info
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      mail:
+        condition: service_started
+
+volumes:
+  dbdata:

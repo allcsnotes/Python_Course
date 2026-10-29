@@ -1,0 +1,3 @@
+FROM m19l02-api:v1
+COPY --chown=app:app secret.env /tmp/secret.env
+RUN rm /tmp/secret.env

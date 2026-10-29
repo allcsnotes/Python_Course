@@ -1,0 +1,14 @@
+{
+	auto_https off
+}
+
+# The public door.
+:80 {
+	import /etc/caddy/active.caddy
+}
+
+# A private door on the server itself: the NEW version is tested here
+# before any visitor is sent to it.
+:8081 {
+	import /etc/caddy/preview.caddy
+}

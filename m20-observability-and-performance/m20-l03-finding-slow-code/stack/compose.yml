@@ -1,0 +1,29 @@
+name: m20l03
+
+services:
+  postgres:
+    image: postgres:17.11
+    container_name: m20l03-pg
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
+    environment: {POSTGRES_USER: allcs, POSTGRES_PASSWORD: allcs, POSTGRES_DB: allcs}
+    ports: ["20503:5432"]
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U allcs"], interval: 2s, timeout: 2s, retries: 15}
+  redis:
+    image: redis:8
+    container_name: m20l03-redis
+    ports: ["20403:6379"]
+    healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 2s, timeout: 2s, retries: 15}
+  api:
+    image: m20l03-api:profile
+    container_name: m20l03-api
+    cap_add: [SYS_PTRACE]
+    environment:
+      DATABASE_URL: postgresql+psycopg://allcs:allcs@postgres:5432/allcs
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: demo-only-not-a-real-secret-4f2a
+      WEB_CONCURRENCY: "2"
+      GUNICORN_CMD_ARGS: "--max-requests 0 --max-requests-jitter 0"
+    ports: ["8203:8000"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}

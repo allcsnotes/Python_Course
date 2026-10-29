@@ -1,0 +1,4 @@
+#!/bin/sh
+# Run a command in a throwaway container. The project folder is mounted read-only,
+# and the container is removed when the command ends.
+docker run --rm -v "$PWD":/src:ro pyrepo-m21-box "$@"

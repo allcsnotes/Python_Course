@@ -1,0 +1,55 @@
+name: m19l04
+
+x-app: &app
+  image: m19l04-allcs:${TAG:-1}
+  environment: &env
+    DATABASE_URL: postgresql+psycopg://allcs:allcs@postgres:5432/allcs
+    REDIS_URL: redis://redis:6379/0
+    SECRET_KEY: demo-only-not-a-real-secret-4f2a
+    WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+    POOL_SIZE: ${POOL_SIZE:-5}
+    MAX_OVERFLOW: ${MAX_OVERFLOW:-10}
+    FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1}
+  depends_on:
+    postgres: {condition: service_healthy}
+    redis: {condition: service_healthy}
+  stop_grace_period: 30s
+
+services:
+  postgres:
+    image: postgres:17.11
+    container_name: m19l04-pg
+    environment: {POSTGRES_USER: allcs, POSTGRES_PASSWORD: allcs, POSTGRES_DB: allcs}
+    ports: ["19504:5432"]
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U allcs"], interval: 2s, timeout: 2s, retries: 15}
+    networks: [demo]
+  redis:
+    image: redis:8
+    container_name: m19l04-redis
+    ports: ["19404:6379"]
+    healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 2s, timeout: 2s, retries: 15}
+    networks: [demo]
+  app1:
+    <<: *app
+    container_name: m19l04-app1
+    ports: ["8191:8000"]
+    environment: {<<: *env, APP_VERSION: "${V1:-1}"}
+    networks: {demo: {ipv4_address: 172.29.194.11}}
+  app2:
+    <<: *app
+    container_name: m19l04-app2
+    ports: ["8193:8000"]
+    environment: {<<: *env, APP_VERSION: "${V2:-1}"}
+    networks: {demo: {ipv4_address: 172.29.194.12}}
+  proxy:
+    image: nginx:1.29-alpine
+    container_name: m19l04-proxy
+    ports: ["8194:80"]
+    volumes: ["./conf:/etc/nginx/conf.d:ro"]
+    depends_on: [app1, app2]
+    networks: {demo: {ipv4_address: 172.29.194.10}}
+
+networks:
+  demo:
+    name: m19l04-net
+    ipam: {config: [{subnet: 172.29.194.0/24}]}

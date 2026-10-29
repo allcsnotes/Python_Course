@@ -1,0 +1,55 @@
+name: m22b15
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: m22b15-pg
+    environment: {POSTGRES_USER: allcs, POSTGRES_PASSWORD: allcs, POSTGRES_DB: allcs}
+    ports: ["22551:5432"]
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U allcs"], interval: 2s, timeout: 2s, retries: 15}
+  redis:
+    image: redis:8
+    container_name: m22b15-redis
+    ports: ["22451:6379"]
+    healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 2s, timeout: 2s, retries: 15}
+  mailpit:
+    image: axllent/mailpit:v1.32.0
+    container_name: m22b15-mailpit
+    ports: ["22525:1025", "22526:8025"]
+  api:
+    build: ../allcs
+    image: m22b15-api:1
+    container_name: m22b15-api
+    ports: ["8725:8000"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://allcs:allcs@postgres:5432/allcs
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: demo-only-not-a-real-secret-4f2a
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    volumes: ["./seed.py:/app/seed.py:ro"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+  # the scheduler: same image as the bot, cron inside (see ../bot/Dockerfile); started with --profile cron
+  cron:
+    profiles: ["cron"]
+    build: {context: ../bot}
+    image: m22b15-bot:1
+    container_name: m22b15-cron
+    environment:
+      API_URL: http://api:8000
+      API_USER: reports@allcsvideos.com
+      API_PASSWORD: demo-report-bot-pass
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      MAIL_TO: meera@allcsvideos.com
+      MAIL_FROM: reports@allcsvideos.com
+      ALERT_TO: asha@allcsvideos.com
+      OUT_DIR: /data
+      TZ: Asia/Kolkata
+    volumes: ["m22b15-data:/data"]
+    depends_on: [api, mailpit]
+
+volumes:
+  m22b15-data: {name: m22b15-data}

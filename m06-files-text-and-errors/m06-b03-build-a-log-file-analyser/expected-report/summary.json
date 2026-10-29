@@ -1,0 +1,11 @@
+{
+  "total_lines": 6000,
+  "bad_lines": 6,
+  "levels": {
+    "INFO": 5311,
+    "ERROR": 204,
+    "WARNING": 479
+  },
+  "busiest_hour": 14,
+  "errors_in_busiest_hour": 96
+}

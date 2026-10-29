@@ -1,0 +1,6 @@
+id,title,level,price
+1,Python for Beginners,beginner,999
+2,FastAPI in a Weekend,intermediate,1499
+3,SQL and Postgres,beginner,1299
+4,Docker for Python Apps,intermediate,1799
+5,Async Python,advanced,1999

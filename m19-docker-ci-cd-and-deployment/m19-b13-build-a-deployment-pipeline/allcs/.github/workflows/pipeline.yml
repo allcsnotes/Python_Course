@@ -1,0 +1,103 @@
+name: pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  # Where images go. Rehearsal: a registry on this Mac. On AWS, set the
+  # repository variable REGISTRY to <account>.dkr.ecr.us-east-1.amazonaws.com
+  REGISTRY: ${{ vars.REGISTRY || 'localhost:19050' }}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.6"
+          enable-cache: ${{ !env.ACT }}
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.6"
+          enable-cache: ${{ !env.ACT }}
+      - run: uv sync --locked
+      - run: uv run pyright
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        python: ["3.13", "3.14"]
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: allcs
+          POSTGRES_PASSWORD: allcs
+          POSTGRES_DB: allcs_test
+        ports: ["19513:5432"]
+        options: >-
+          --health-cmd "pg_isready -U allcs"
+          --health-interval 2s
+          --health-retries 20
+      redis:
+        image: redis:8
+        ports: ["19413:6379"]
+    env:
+      DATABASE_URL: postgresql+psycopg://allcs:allcs@localhost:19513/allcs_test
+      REDIS_URL: redis://localhost:19413/15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+          version: "0.13.6"
+          enable-cache: ${{ !env.ACT }}
+      - run: uv sync --locked
+      - run: uv run pytest -q --cov --cov-fail-under=90
+
+  image:
+    needs: [lint, typecheck, test]
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: meta
+        run: echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      # On AWS, add before the build:
+      #   - uses: aws-actions/configure-aws-credentials@v4   (OIDC role)
+      #   - uses: aws-actions/amazon-ecr-login@v2
+      - name: Build
+        run: >
+          docker build
+          -t "$REGISTRY/allcs:${{ steps.meta.outputs.tag }}"
+          --build-arg "APP_VERSION=${{ steps.meta.outputs.tag }}" .
+      - name: Push
+        run: docker push "$REGISTRY/allcs:${{ steps.meta.outputs.tag }}"
+
+  deploy:
+    needs: image
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # On GitHub, a person must click Approve here.
+    environment: production
+    env:
+      MODE: ${{ vars.DEPLOY_MODE || 'exec' }}  # exec | ssh
+      HOST: ${{ vars.DEPLOY_HOST }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Roll out
+        run: bash deploy/remote.sh deploy "${{ needs.image.outputs.tag }}"

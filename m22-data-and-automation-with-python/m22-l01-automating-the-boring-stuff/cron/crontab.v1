@@ -1,0 +1,1 @@
+* * * * * python job.py >> /app/logs/job.log 2>&1

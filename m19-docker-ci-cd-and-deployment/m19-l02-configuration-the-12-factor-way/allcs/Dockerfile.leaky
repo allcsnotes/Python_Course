@@ -1,0 +1,2 @@
+FROM m19l02-api:v1
+ENV SECRET_KEY=demo-baked-in-secret-key-1357

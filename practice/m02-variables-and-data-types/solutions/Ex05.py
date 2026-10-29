@@ -1,0 +1,13 @@
+# Exercise 05 - Predict the numbers
+print(2 + 3 * 4)
+print((2 + 3) * 4)
+print(10 / 2)
+print(7 / 2)
+print(17 // 5)
+print(17 % 5)
+print(2 ** 10)
+print(10 % 2, 7 % 2)
+print(round(2.5), round(3.5), round(3.14159, 2))
+print(int(3.99))
+print(divmod(17, 5))
+print(type(5), type(5.0))

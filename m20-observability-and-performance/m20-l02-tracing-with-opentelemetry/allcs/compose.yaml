@@ -1,0 +1,69 @@
+name: m20l02
+
+x-app: &app
+  build: .
+  image: m20l02-api
+  environment: &env
+    DATABASE_URL: postgresql+psycopg://allcs:allcs@db:5432/allcs
+    REDIS_URL: redis://redis:6379/0
+    SMTP_HOST: mail
+    SMTP_PORT: "1025"
+    SECRET_KEY: demo-secret-not-real-0123456789-abcdefgh
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+  depends_on: &deps
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+    jaeger:
+      condition: service_started
+
+services:
+  db:
+    image: postgres:17.11
+    environment:
+      POSTGRES_USER: allcs
+      POSTGRES_PASSWORD: allcs
+      POSTGRES_DB: allcs
+    ports: ["20502:5432"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "allcs"]
+      interval: 2s
+      retries: 20
+
+  redis:
+    image: redis:8
+    ports: ["20402:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 20
+
+  mail:
+    image: axllent/mailpit:v1.32.0
+
+  jaeger:
+    image: jaegertracing/jaeger:2.22.0
+    ports: ["20162:16686"]
+
+  migrate:
+    <<: *app
+    command: alembic upgrade head
+
+  api:
+    <<: *app
+    ports: ["8202:8000"]
+    environment:
+      <<: *env
+      OTEL_SERVICE_NAME: allcs-api
+      OTEL_TRACES_SAMPLER: ${OTEL_TRACES_SAMPLER:-parentbased_always_on}
+      OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-1}
+
+  worker:
+    <<: *app
+    command: celery -A app.worker worker --loglevel=info --concurrency=2
+    healthcheck:
+      disable: true
+    environment:
+      <<: *env
+      OTEL_SERVICE_NAME: allcs-worker

@@ -1,0 +1,2 @@
+count: int
+print(count)

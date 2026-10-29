@@ -1,0 +1,6 @@
+course = ("Python Basics", 1499, "beginner")
+point = (50.11, 8.68)
+colour = (255, 140, 0)
+print(course)
+print(point)
+print(colour)

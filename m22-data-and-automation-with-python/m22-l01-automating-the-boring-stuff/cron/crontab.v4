@@ -1,0 +1,6 @@
+PATH=/usr/local/bin:/usr/bin:/bin
+SMTP_HOST=m22l01-mail
+SMTP_PORT=1025
+SMTP_USER=asha
+SMTP_PASSWORD=demo-only
+* * * * * cd /app && python job.py >> /app/logs/job.log 2>&1

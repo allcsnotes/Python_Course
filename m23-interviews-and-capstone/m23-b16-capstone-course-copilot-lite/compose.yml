@@ -1,0 +1,64 @@
+# Demo values only: the database password, the secret key and the mail setup are fake and exist only on your laptop.
+name: m23b16
+
+x-app: &app
+  build: .
+  image: m23b16-copilot:1
+  environment:
+    DATABASE_URL: postgresql+psycopg://copilot:copilot@postgres/copilot
+    REDIS_URL: redis://redis:6379/0
+    SECRET_KEY: ${SECRET_KEY:-demo-only-secret-change-me-1234}
+    SMTP_HOST: mailpit
+    SMTP_PORT: "1025"
+
+services:
+  postgres:
+    image: postgres:17
+    user: postgres
+    environment:
+      POSTGRES_USER: copilot
+      POSTGRES_PASSWORD: copilot
+      POSTGRES_DB: copilot
+    ports: ["23536:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U copilot"]
+      interval: 2s
+      retries: 15
+  redis:
+    image: redis:8
+    user: redis
+    ports: ["23436:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 15
+  mailpit:
+    image: axllent/mailpit:v1.32.0
+    user: "1000:1000"
+    ports: ["23525:1025", "23526:8025"]
+
+  migrate:
+    <<: *app
+    command: sh -c "alembic upgrade head && python -m app.seed"
+    depends_on:
+      postgres: {condition: service_healthy}
+  api:
+    <<: *app
+    ports: ["8736:8000"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request as u; u.urlopen("http://localhost:8000/health/ready")
+      interval: 3s
+      retries: 15
+  worker:
+    <<: *app
+    command: celery -A app.worker worker -c 2 -l INFO
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}

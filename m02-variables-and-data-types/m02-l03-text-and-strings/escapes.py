@@ -1,0 +1,5 @@
+print("Name:\tAsha")
+print("Line one\nLine two")
+print("She said \"hi\"")
+print('It\'s Python')
+print("C:\\new\\table")

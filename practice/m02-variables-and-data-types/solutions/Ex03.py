@@ -1,0 +1,12 @@
+# Exercise 03 - Fix the broken names (all five repaired)
+first_course = "Python"       # was: 2nd_course  (cannot start with a digit)
+course_name = "Spring Boot"   # was: course name (no spaces)
+class_name = "A"              # was: class       (a keyword)
+price = 1499                  # was: Price assigned, price printed (case matters)
+greeting = "Lukas"            # was: print = "Lukas" (hid the print helper)
+
+print(first_course)
+print(course_name)
+print(class_name)
+print(price)
+print("Hello", greeting)

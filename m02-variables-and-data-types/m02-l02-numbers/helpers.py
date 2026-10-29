@@ -1,0 +1,5 @@
+print(abs(-250))
+print(min(1999, 1499, 2999))
+print(max(1999, 1499, 2999))
+print(pow(2, 10))
+print(divmod(17, 5))

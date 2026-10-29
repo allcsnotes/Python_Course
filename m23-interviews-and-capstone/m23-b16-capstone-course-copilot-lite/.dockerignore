@@ -1,0 +1,11 @@
+.venv
+.git
+.env
+.coverage
+__pycache__
+.ruff_cache
+.pytest_cache
+tests
+*.log
+*.pid
+compose*.yml
